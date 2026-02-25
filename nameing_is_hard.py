@@ -20,7 +20,7 @@ name_search={
 class MENU():
     def __init__(self):
 
-        # root.attributes("-fullscreen",True)
+        root.attributes("-fullscreen",True)
         self.frame = Frame(padx=0, pady=0)
         self.frame.grid(row=0, column=0)
         self.photo = PhotoImage(file='/home/nate/school/torch.png').zoom(12).subsample(4)
@@ -37,56 +37,54 @@ class MENU():
         self.frame.destroy()
         Loading()
 class Loading():
-    """laoding bar"""
+    """loading bar"""
     # credit to https://devhubcommunity.hashnode.dev/displaying-gifs-in-tkinter-python?__cf_chl_f_tk=rY.jHPCFPHRvxYg1Pxc0gYmI8mk0.291TAYfHCYhAJQ-1771967830-1.0.1.1-Bx3kTWEOHwG7G9vLJ13no9jxQB2aVjFjpnvr0UuJ9W8
     # and https://www.geeksforgeeks.org/python/how-to-use-images-as-backgrounds-in-tkinter/
     def __init__(self):
-        # self.bar= []
-        # self.frame = Frame(padx=0, pady=0)
-        # self.frame.grid(row=0, column=0)
-        self.time = random.randint(70,100)
-        print("r")
+        # gets the file for the background of the gif
         self.photo = PhotoImage(file="bar.gif")
-        # self.backdrop = Label(image=self.photo)
+        # defines the canvas and its background
         self.canvas = Canvas(root, width=1920, height=1080,bg="#262626")
-
         self.canvas.pack(fill="both", expand=True)
 
-        # Display image
 
-        self.gif_label = Label(image="")
-        self.gif_label.pack(side="bottom",anchor='s')
+        # learns about the length of the gif
         self.info = Image.open('/home/nate/school/bar.gif')
+        # sets the frames
         self.frames = self.info.n_frames
+        print(self.frames)
         self.photoimage_objects = []
+        # stores the invidual frames
         for i in range(1, self.frames):
             self.obj = PhotoImage(file='/home/nate/school/bar.gif', format=f'gif -index {i}')
             self.photoimage_objects.append(self.obj)
-        self.animation(current_frame=0)
+        print(len(self.photoimage_objects))
+        # starts the animation
+        self.frames-=1
+        print(self.frames)
+        self.animation()
         root.mainloop()
     def animation(self,current_frame=0):
         global loop
         self.image = self.photoimage_objects[current_frame]
         print(current_frame)
-        self.canvas.create_image(950, 860, image=self.photo, )
-        self.canvas.create_image(950, 860, image=self.image)
-
+        # reprints background and then foreground overtop
+        self.canvas.create_image(950, 860, image=self.photo)
+        self.canvas.delete("self.foreground")
+        self.foreground = self.canvas.create_image(950, 860, image=self.image)
+        # increments the frame
         current_frame = current_frame + 1
 
         if current_frame == self.frames:
-            current_frame = 0
-        random.randint(60, 150)
-        loop = root.after(300, lambda: self.animation(current_frame))
-        # def stop_animation():
-        #     root.after_cancel(loop)
-        #
-        #     gif_label = Label(root, image="")
-        #     gif_label.pack()
-        #     start = Button(root, text="Start", command=lambda: animation())
-        #     start.pack()
+            self.Loading().destroy()
+            startgame()
 
 
+        loop = root.after(random.randint(60, 150), lambda: self.animation(current_frame))
 
+class startgame():
+    def __init__(self):
+        self.frame = Frame(padx=0, pady=0)
 
 if __name__ == '__main__':
     """who knows what this does"""
