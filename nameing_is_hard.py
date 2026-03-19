@@ -1,5 +1,6 @@
 from tkinter import *
 import time
+from functools import partial
 import random
 import os
 from PIL import Image
@@ -61,6 +62,18 @@ class fix():
     """rounding"""
     def r(self,n):
         return int(round(n))
+def start_drag(event):
+    # Store the initial position of the widget when dragging starts
+    event.widget.startX = event.x  # Store initial X position
+    event.widget.startY = event.y  # Store initial Y position
+
+def on_drag(event):
+    # Update widget position as it's dragged
+    widget = event.widget  # Get reference to the dragged widget
+    x = widget.winfo_x() - widget.startX + event.x
+    y = widget.winfo_y() - widget.startY + event.y
+    widget.place(x=x, y=y)  # Move the widget
+
 class MENU():
     def __init__(self):
 
@@ -68,7 +81,7 @@ class MENU():
         # makes the screen full
         root.attributes("-fullscreen",True)
         # gets the background image
-        self.photo = PhotoImage(file='/home/nate/school/long_image.png')
+        self.photo = PhotoImage(file='long_image.png')
         # puts the background image
         self.backdrop = Label(root, image=self.photo)
         self.backdrop.place(relx=0.5, rely=0.5,anchor="center")
@@ -96,11 +109,13 @@ class MENU():
     def settings(self):
         settings("menu")
 class settings():
-    def __init__(self,type):
+    def __init__(self,type,bar=[]):
         self.presetsettings = presetsettings
         self.set_list = []
-
-        self.set_back_image = PhotoImage(file='/home/nate/school/setting.png')
+        self.bar=bar
+        for i in self.bar:
+            i.config(state="disabled")
+        self.set_back_image = PhotoImage(file='setting.png')
         self.set_back = Label(root, image=self.set_back_image,borderwidth=0)
         self.set_back.place(relx=0.5, rely=0.5,anchor="center")
         self.set_list.append(self.set_back)
@@ -179,6 +194,8 @@ class settings():
 
     def un_setting(self):
         # closes the menu
+        for i in self.bar:
+            i.config(state="normal")
         for item in self.set_list:
             item.destroy()
 
@@ -198,7 +215,7 @@ class Loading():
 
 
         # learns about the length of the gif
-        self.info = Image.open('/home/nate/school/bar.gif')
+        self.info = Image.open('bar.gif')
         # sets the frames
         self.frames = self.info.n_frames
         self.photoimage_objects = []
@@ -209,7 +226,7 @@ class Loading():
         root.mainloop()
     def animation(self,current_frame=0):
         global loop
-        self.image = PhotoImage(file='/home/nate/school/bar.gif', format=f'gif -index {current_frame}')
+        self.image = PhotoImage(file='bar.gif', format=f'gif -index {current_frame}')
         # reprints background and then foreground overtop
         self.canvas.create_image(950, 860, image=self.photo)
         self.canvas.create_image(950, 860, image=self.image)
@@ -247,15 +264,60 @@ class load_level():
 class menu_bar():
     # a bar for the menu
     def __init__(self):
+
         self.canvas = Canvas(root, width=dim(120).width, height=180, bg="#754525")
         self.canvas.pack(fill="both")
         self.menu_bar = Label(bg="#754525",width=dim(120).width,height=fix().r(dim(0.75).height))
         self.menu_bar.place(relx=0.5, rely=dim(0.009).height, anchor="center")
-        self.menu_button = Button(bg="#604330",width=fix().r(dim(0.6).width),height=fix().r(dim(0.6).height),command=lambda: settings("game"))
+        self.menu_button = Button(bg="#604330",width=fix().r(dim(0.6).width),height=fix().r(dim(0.6).height),command=lambda: settings("game",self.menubar_list))
         self.menu_button.place(relx=dim(0.0025).width, rely=dim(0.009).height, anchor="center")
+        self.invintory = Button(bg="#604330", width=fix().r(dim(0.009).width), height=fix().r(dim(0.6).height),command=lambda: magic())#invintory(self.menubar_list)
+        self.invintory.place(relx=dim(0.05).width, rely=dim(0.01).height, anchor="center")
+        self.menubar_list = [self.menu_button, self.invintory,self.canvas]
+# not done
+class invintory():
+    def __init__(self,bar):
+        self.bar = bar
+        for i in self.bar:
+            i.config(state="disabled")
+        self.canvas = Canvas(root, width=dim(120).width, height=180, bg="#FFFFFF")
+        self.canvas.pack(fill="both", expand=True)
+        self.invintory = PhotoImage(file='invintory.png')
+        self.set = Label(root, image=self.invintory,borderwidth=0)
+        self.set.place(relx=0.5, rely=0.5, anchor="center")
+        self.exit = Button(root, text="Close",command=lambda :self.go())
+        self.exit.place(relx=dim(0.0402).width, rely=dim(0.093).height, anchor="center")
+        self.end = [self.set, self.exit, self.canvas,]
 
-
-
+        root.mainloop()
+# not done /////////////////////////////\\\\\\\\\\\\\\/\/\/\\\\\\\\\\\\\\\\\////////////////////////////////////
+    def go(self):
+        for i in self.end:
+            i.destroy()
+        for i in self.bar:
+            i.config(state="normal")
+class magic():
+    def __init__(self):
+        start = 900
+        might = start
+        mighty = 750
+        for five in range(25):
+            label = Label(root, bg=f"#{str(random.randint(100000,999999))}", height=2, width=4,padx=0, pady=0)
+            label.place(x=might, y=mighty,)  # Place the label at initial position
+            if might == 1100:
+                might = start
+                mighty += 50
+            else:
+                might+= 50
+        # Bind mouse events to the label for dragging functionality
+            label.bind("<ButtonPress-1>", start_drag)  # Detect mouse press to start dragging
+            label.bind("<B1-Motion>", on_drag)  # Move label while dragging
+    def relocate(self, event):
+        print(self.canvas.winfo_pointerxy())
+        x0, y0 = self.canvas.winfo_pointerxy()
+        x0 -= self.canvas.winfo_rootx()
+        y0 -= self.canvas.winfo_rooty()
+        self.canvas.coords(self.id_cLabel, x0, y0)
 
 
 
