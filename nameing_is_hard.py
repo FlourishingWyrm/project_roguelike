@@ -1,5 +1,6 @@
 from tkinter import *
 import time
+import math
 from functools import partial
 import random
 import os
@@ -39,6 +40,17 @@ active_game = ""
 players_unlocked = []
 invintory = []
 current_moves = []
+start = 900
+might = start
+mighty = 750
+grid = []
+for five in range(25):
+    if might == 1100:
+        might = start
+        mighty += 50
+    else:
+        might+= 50
+    grid.append([might, mighty])
 font = ("arial", 16, "bold")
 # https://stackoverflow.com/questions/4719438/editing-specific-line-in-text-file-in-python
 with open('game_data.txt') as f:
@@ -63,17 +75,58 @@ class fix():
     def r(self,n):
         return int(round(n))
 def start_drag(event):
+    global des
     # Store the initial position of the widget when dragging starts
     event.widget.startX = event.x  # Store initial X position
     event.widget.startY = event.y  # Store initial Y position
+    options = [[0,0],[50,0],[50,50],[0,50],[-50,0],[0,-50],[-50,-50],[-50,50],[50,-50]]
+    des = []
+    for i in options:
+        rat = [event.widget.winfo_x() + i[0], event.widget.winfo_y() + i[1]]
+        print(rat)
+        if rat in grid:
+            des.append(rat)
 
+
+
+clock = 0
+widget = ""
+drop = [0, 0]
 def on_drag(event):
+    global clock,widget,drop
+    clock +=1
     # Update widget position as it's dragged
     widget = event.widget  # Get reference to the dragged widget
+
     x = widget.winfo_x() - widget.startX + event.x
     y = widget.winfo_y() - widget.startY + event.y
-    widget.place(x=x, y=y)  # Move the widget
+    most = 100000000000000000000000
 
+    for i in des:
+        print(des)
+        if sum(i)-(x+y)<most:
+            most = sum(i)-(x+y)
+            drop = i
+    widget.place(x=x, y=y)  # Move the widget
+    print(clock)
+    print(x,y)
+    clock-=1
+    widget.bind("<ButtonRelease-1>", snap)
+def snap(event):
+    print(grid)
+    widget = event.widget  # Get reference to the dragged widget
+
+    x = widget.winfo_x() - widget.startX + event.x
+    y = widget.winfo_y() - widget.startY + event.y
+    most = 10000000000000000000000000000000000000000
+
+    for i in des:
+        print(des,[x,y])
+        if math.sqrt(((i[0]-x)*(i[1]-y))+((i[1]-y)*(i[1]-y)))< most:
+            most = math.sqrt(((i[0]-x)*(i[1]-y))+((i[1]-y)*(i[1]-y)))
+            drop = i
+    print(most,"hiee")
+    widget.place(x=drop[0], y=drop[1])
 class MENU():
     def __init__(self):
 
@@ -301,14 +354,17 @@ class magic():
         start = 900
         might = start
         mighty = 750
+        grid = []
         for five in range(25):
             label = Label(root, bg=f"#{str(random.randint(100000,999999))}", height=2, width=4,padx=0, pady=0)
             label.place(x=might, y=mighty,)  # Place the label at initial position
+            grid.append([might, mighty])
             if might == 1100:
                 might = start
                 mighty += 50
             else:
                 might+= 50
+
         # Bind mouse events to the label for dragging functionality
             label.bind("<ButtonPress-1>", start_drag)  # Detect mouse press to start dragging
             label.bind("<B1-Motion>", on_drag)  # Move label while dragging
